@@ -9,7 +9,7 @@ Created on Thu Apr  9 19:18:57 2020
 import numpy as np
 import matplotlib.pyplot as plt
 
-data_folder = '/Users/rahul/Desktop/NewProjects/PythonLevelSet/data/bentheimer_sandstone/'
+data_folder = '/Users/rahul/Desktop/NewProjects/ls_python/data/bentheimer_sandstone/'
 
 img = np.fromfile(data_folder + 'block00000000.nc',dtype='uint16')
 #%%
