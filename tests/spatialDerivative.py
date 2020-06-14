@@ -8,7 +8,7 @@ Created on Mon May 25 15:11:35 2020
 
 import numpy as np
 
-def upwindFirstFirst(data, dim):
+def upwindFirstFirst(data, dim, grid):
     # dim 0 is x -> in data it is axis 1
     # dim 1 is y -> in data it is axis 0
     # dim 2 is z -> same
@@ -19,8 +19,9 @@ def upwindFirstFirst(data, dim):
     else:
         axis = dim
         
-    D_minus = np.diff(data,prepend=1,axis=axis)
-    D_plus = np.diff(data,append=1,axis=axis)
+    D_minus = np.diff(data,prepend=1,axis=axis)/grid.dx
+    D_plus = np.diff(data,append=1,axis=axis)/grid.dx
+    
     
     return D_minus, D_plus
 

@@ -13,6 +13,8 @@ def odeCFL1(data, tSpan, rhsFunc, grid, rhsData, options):
     while t < tSpan[1]:
         rhs, stepBound = rhsFunc(data, grid, rhsData)
         deltaT = min(options.factorCFL * stepBound, tSpan[1] - t, options.maxStep)
+        t = t + deltaT
+        print('time inside odeCFL1: ', t)
         data_new = data + deltaT * rhs
         data = data_new
     

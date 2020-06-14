@@ -12,6 +12,9 @@ for now, only constant flow field is implemented
 """
 import numpy as np
 from gridHandler import Grid
+from terms import schemeData, velocityTerm, fill_grid
+from odeCFL import odeCFL1
+from options import Options
 
 # Integration parameters.
 tMax = 1.0                 # End time.
@@ -40,16 +43,18 @@ useSubplots = 1
 
 # Create the grid.
 g_dim = 2
-g_min = -1
-g_max = 1
+g_min = [-1, -1]
+g_max = [1, 1]
 g_dx = 1/100
 
 grid = Grid(g_dim, g_min, g_max, g_dx)
-
+grid.getGhostBounds(2)
+#%%
 # Create flow field
 constV = np.zeros(2)
-constV[0] = 2
+constV[0] = 1
 
+vel = fill_grid(grid, constV)
 flowType = 'constant'
 
 # Create initial conditions (a circle/sphere)
@@ -57,10 +62,28 @@ flowType = 'constant'
 center = [0, 0.1]
 radius = 0.35
 gridvals = grid.getGridVals()
-data = np.zeros(np.shape(gridvals[0]))
+data = np.zeros(grid.gridShape)
+
 for i in range(0, grid.dim):
   data = data + np.power(gridvals[i] - center[i],2);
 
-data = np.sqrt(data) - radius;
+data = np.sqrt(data) - radius
+
+#%%
+data = grid.ghostExtrapolate(data, 2)
+
 data0 = data;
 
+schemeConvection = schemeData(grid, velocity=vel)
+
+t = t0
+opts = Options()
+
+#%%
+while t < tMax:
+    tSpan = [ t, min(tMax, t + tPlot) ]
+    t, data_next = odeCFL1(data, tSpan, velocityTerm, grid, schemeConvection, opts)
+    print(t)
+    data = data_next
+
+    
