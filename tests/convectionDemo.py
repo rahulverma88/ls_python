@@ -43,8 +43,8 @@ useSubplots = 1
 
 # Create the grid.
 g_dim = 2
-g_min = [-1, -1]
-g_max = [1, 1]
+g_min = [-1, -2]
+g_max = [1, 4]
 g_dx = 1/100
 
 grid = Grid(g_dim, g_min, g_max, g_dx)
@@ -52,7 +52,7 @@ grid.getGhostBounds(2)
 #%%
 # Create flow field
 constV = np.zeros(2)
-constV[0] = 1
+constV[1] = 1
 
 vel = fill_grid(grid, constV)
 flowType = 'constant'
@@ -85,5 +85,6 @@ while t < tMax:
     t, data_next = odeCFL1(data, tSpan, velocityTerm, grid, schemeConvection, opts)
     print(t)
     data = data_next
+
 
     

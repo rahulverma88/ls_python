@@ -9,7 +9,13 @@ import numpy as np
 from decimal import Decimal
 
 class Grid:
-    ''' class structure for managing all grids'''
+    ''' class structure for managing all grids
+    
+        grid spacing dx is assumed to be constant in all dimensions for now.
+        doesn't seem to make much sense complicating code without having full
+        unstructured grids, or at least adaptive grids.
+    
+    '''
     
     def __init__(self, dim, gmin, gmax, dx, bdry = 'ghostExtrapolate'):
         self.dim = dim
@@ -39,7 +45,7 @@ class Grid:
             x = np.arange(self.gmin[1], self.gmax[1] + self.dx, self.dx)
             y = np.arange(self.gmin[0], self.gmax[0] + self.dx, self.dx)
             
-            xv, yv = np.meshgrid(x,y)
+            xv, yv = np.meshgrid(x,y, indexing='ij')
             
             return xv, yv
         elif self.dim == 3:
@@ -47,7 +53,7 @@ class Grid:
             y = np.arange(self.gmin[0], self.gmin[0] + self.dx, self.dx)
             z = np.arange(self.gmin[2], self.gmax[2]+ self.dx, self.dx)
             
-            xv, yv, zv = np.meshgrid(x,y,z)
+            xv, yv, zv = np.meshgrid(x,y,z, indexing='ij')
             
             return xv, yv, zv
 
@@ -56,7 +62,7 @@ class Grid:
             x = np.arange(self.gmin_ghost[1], self.gmax_ghost[1] + self.dx, self.dx)
             y = np.arange(self.gmin_ghost[0], self.gmax_ghost[0] + self.dx, self.dx)
             
-            xv, yv = np.meshgrid(x,y)
+            xv, yv = np.meshgrid(x,y, indexing='ij')
             
             return xv, yv
         elif self.dim == 3:
@@ -64,7 +70,7 @@ class Grid:
             y = np.arange(self.gmin_ghost[0], self.gmin_ghost[0] + self.dx, self.dx)
             z = np.arange(self.gmin_ghost[2], self.gmin_ghost[2]+ self.dx, self.dx)
             
-            xv, yv, zv = np.meshgrid(x,y,z)
+            xv, yv, zv = np.meshgrid(x,y,z, indexing='ij')
             
             return xv, yv, zv
     '''
@@ -72,41 +78,61 @@ class Grid:
     Currently 2D only. Must add functionality for 3D
     '''
     def ghostExtrapolate(self, data, stencil):
-        ny, nx = np.shape(data)
-        
-        # at lower x-end:
-        sign = np.sign(data[:,0])
-        abs_diff = np.abs(data[:,0]-data[:,1])
-        slope = sign * abs_diff
+        if self.dim == 2:
+            ny, nx = np.shape(data)
             
-        lower_bdry_x = np.array([data[:,0] + slope * (sten + 1) for sten in np.arange(stencil)])[::-1].transpose()
+            # at lower x-end:
+            sign = np.sign(data[:,0])
+            abs_diff = np.abs(data[:,0]-data[:,1])
+            slope = sign * abs_diff
+                
+            lower_bdry_x = np.array([data[:,0] + slope * (sten + 1) for sten in np.arange(stencil)], ndmin = 2)[::-1].transpose()
+            
+            # at upper x-end:
+            sign = np.sign(data[:, nx - 1])
+            abs_diff = np.abs(data[:, nx - 1]-data[:, nx - 2])
+            slope = sign * abs_diff
+            
+            upper_bdry_x = np.array([data[:,nx - 1] + slope * (sten + 1) for sten in np.arange(stencil)], ndmin = 2).transpose()
+            
+            data = np.concatenate((lower_bdry_x, data, upper_bdry_x),axis=1)
+            
+            # at lower y-end:
+            sign = np.sign(data[0])
+            abs_diff = np.abs(data[0]-data[1])
+            slope = sign * abs_diff
+            
+            lower_bdry_y = np.array([data[0] + slope * (sten + 1) for sten in np.arange(stencil)], ndmin = 2)[::-1]
+            
+            # at upper y-end:
+            sign = np.sign(data[ny - 1])
+            abs_diff = np.abs(data[ny - 1]-data[ny - 2])
+            slope = sign * abs_diff
+            
+            upper_bdry_y = np.array([data[ny - 1] + slope * (sten + 1) for sten in np.arange(stencil)], ndmin = 2)
+            
+            data = np.concatenate((lower_bdry_y, data, upper_bdry_y), axis=0)
         
-        # at upper x-end:
-        sign = np.sign(data[:, nx - 1])
-        abs_diff = np.abs(data[:, nx - 1]-data[:, nx - 2])
-        slope = sign * abs_diff
-        
-        upper_bdry_x = np.array([data[:,nx - 1] + slope * (sten + 1) for sten in np.arange(stencil)]).transpose()
-        
-        data = np.concatenate((lower_bdry_x, data, upper_bdry_x),axis=1)
-        
-        # at lower y-end:
-        sign = np.sign(data[0])
-        abs_diff = np.abs(data[0]-data[1])
-        slope = sign * abs_diff
-        
-        lower_bdry_y = np.array([data[0] + slope * (sten + 1) for sten in np.arange(stencil)])[::-1]
-        
-        # at upper y-end:
-        sign = np.sign(data[ny - 1])
-        abs_diff = np.abs(data[ny - 1]-data[ny - 2])
-        slope = sign * abs_diff
-        
-        upper_bdry_y = np.array([data[ny - 1] + slope * (sten + 1) for sten in np.arange(stencil)])
-        
-        data = np.concatenate((lower_bdry_y, data, upper_bdry_y), axis=0)
-    
-        return data
+            return data
+        elif self.dim == 3:
+            ny, nx, nz = np.shape(data)
+            
+            # at lower x-end:
+            sign = np.sign(data[:,0,:])
+            abs_diff = np.abs(data[:,0,:]-data[:,1,:])
+            slope = sign * abs_diff
+                
+            lower_bdry_x = np.moveaxis(np.array([data[:,0,:] + slope * (sten + 1) for sten in np.arange(stencil)])[::-1],0,1)
+            
+            # at upper x-end:
+            sign = np.sign(data[:, nx - 1, :])
+            abs_diff = np.abs(data[:, nx - 1, :]-data[:, nx - 2, :])
+            slope = sign * abs_diff
+            
+            upper_bdry_x = np.moveaxis(np.array([data[:,nx - 1, :] + slope * (sten + 1) for sten in np.arange(stencil)]),0,1)
+            
+            data = np.concatenate((lower_bdry_x, data, upper_bdry_x),axis=1)
+            
 
 
 '''
