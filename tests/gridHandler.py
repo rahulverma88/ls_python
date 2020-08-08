@@ -18,10 +18,43 @@ class Grid:
     '''
     
     def __init__(self, dim, gmin, gmax, dx, bdry = 'ghostExtrapolate'):
+        '''
+        Constructor assuming grid spacing dx is passed
+        Passing both grid spacing dx and grid bounds is inherently inconsistent,
+        because of floating point precision issues
+        
+        Here, the convention is taken of adjusting grid_max to remain consistent
+        with the passed grid spacing. This is judged to be better as numerical
+        algorithms are usually analyzed for error in terms of grid spacing and 
+        it is likely a user would care more about that
+        
+        TO-DO:
+        A different constructor which respects grid_max
+
+        Parameters
+        ----------
+        dim : TYPE
+            DESCRIPTION.
+        gmin : TYPE
+            DESCRIPTION.
+        gmax : TYPE
+            DESCRIPTION.
+        dx : TYPE
+            DESCRIPTION.
+        bdry : TYPE, optional
+            DESCRIPTION. The default is 'ghostExtrapolate'.
+
+        Returns
+        -------
+        None.
+
+        '''
         self.dim = dim
         self.gmin = np.array(gmin)
         actual_gmax = []
+        self.gridShape = []
         for dim_gmax in gmax:
+            # trying to determine grid max, while respecting grid spacing
             mod_val = Decimal(str(dim_gmax)) % Decimal(str(dx))
             if mod_val == 0:
                 actual_gmax.append(dim_gmax)
@@ -30,47 +63,49 @@ class Grid:
         self.gmax = np.array(actual_gmax)
         self.dx = np.array(dx)
         self.bdry = bdry
-        self.gridShape = (len(np.arange(self.gmin[1],self.gmax[1] + self.dx, self.dx)),
-                                len(np.arange(self.gmin[0],self.gmax[0] + self.dx, self.dx))
-                                )
+        
+        self.gridShape = [int((self.gmax[1]-self.gmin[1])/self.dx),
+                          int((self.gmax[0]-self.gmin[0])/self.dx)
+                          ]
+        if dim == 3:
+            self.gridShape.append(int((self.gmax[2]-self.gmin[2])/self.dx))
     
     def getGhostBounds(self, stencil):
         self.gmin_ghost = self.gmin - self.dx * stencil
         self.gmax_ghost = self.gmax + self.dx * stencil
-        self.ghostShape = (self.gridShape[0] + 2 * stencil,
-                                self.gridShape[1] + 2 * stencil)
+        self.ghostShape = [self.gridShape[0] + 2 * stencil,
+                                self.gridShape[1] + 2 * stencil]
+        if self.dim == 3:
+            self.ghostShape.append(self.gridShape[2] + 2 * stencil)
         
     def getGridVals(self):
-        if self.dim == 2:
-            x = np.arange(self.gmin[1], self.gmax[1] + self.dx, self.dx)
-            y = np.arange(self.gmin[0], self.gmax[0] + self.dx, self.dx)
-            
-            xv, yv = np.meshgrid(x,y, indexing='ij')
+        x = np.linspace(self.gmin[1], self.gmax[1], self.gridShape[1])
+        y = np.linspace(self.gmin[0], self.gmax[0], self.gridShape[0])
+
+        if self.dim == 2:                 
+            xv, yv = np.meshgrid(x,y, indexing='xy')
             
             return xv, yv
         elif self.dim == 3:
-            x = np.arange(self.gmin[1], self.gmin[1] + self.dx, self.dx)
-            y = np.arange(self.gmin[0], self.gmin[0] + self.dx, self.dx)
-            z = np.arange(self.gmin[2], self.gmax[2]+ self.dx, self.dx)
+            z = np.linspace(self.gmin[2], self.gmax[2], self.gridShape[2])
             
-            xv, yv, zv = np.meshgrid(x,y,z, indexing='ij')
+            xv, yv, zv = np.meshgrid(x,y,z, indexing='xy')
             
             return xv, yv, zv
 
     def getGridValsGhost(self):
+        x = np.linspace(self.gmin_ghost[1], self.gmax_ghost[1], self.ghostShape[1])
+        y = np.linspace(self.gmin_ghost[0], self.gmax_ghost[0], self.ghostShape[0])
+ 
         if self.dim == 2:
-            x = np.arange(self.gmin_ghost[1], self.gmax_ghost[1] + self.dx, self.dx)
-            y = np.arange(self.gmin_ghost[0], self.gmax_ghost[0] + self.dx, self.dx)
-            
-            xv, yv = np.meshgrid(x,y, indexing='ij')
+           
+            xv, yv = np.meshgrid(x,y, indexing='xy')
             
             return xv, yv
         elif self.dim == 3:
-            x = np.arange(self.gmin_ghost[1], self.gmin_ghost[1] + self.dx, self.dx)
-            y = np.arange(self.gmin_ghost[0], self.gmin_ghost[0] + self.dx, self.dx)
-            z = np.arange(self.gmin_ghost[2], self.gmin_ghost[2]+ self.dx, self.dx)
+            z = np.linspace(self.gmin_ghost[2], self.gmax_ghost[2], self.ghostShape[2])
             
-            xv, yv, zv = np.meshgrid(x,y,z, indexing='ij')
+            xv, yv, zv = np.meshgrid(x,y,z, indexing='xy')
             
             return xv, yv, zv
     '''
@@ -133,7 +168,39 @@ class Grid:
             
             data = np.concatenate((lower_bdry_x, data, upper_bdry_x),axis=1)
             
-
+            # at lower y-end:
+            sign = np.sign(data[0,:,:])
+            abs_diff = np.abs(data[0,:,:]-data[1,:,:])
+            slope = sign * abs_diff
+                
+            lower_bdry_y = np.array([data[0,:,:] + slope * (sten + 1) for sten in np.arange(stencil)])[::-1]
+            
+            # at upper y-end:
+            sign = np.sign(data[ny - 1, :,:])
+            abs_diff = np.abs(data[ny - 1, :,:]-data[ny - 2, :,:])
+            slope = sign * abs_diff
+            
+            upper_bdry_y = np.array([data[ny - 1, :, :] + slope * (sten + 1) for sten in np.arange(stencil)])
+            
+            data = np.concatenate((lower_bdry_y, data, upper_bdry_y),axis=0)
+            
+            # at lower z-end:
+            sign = np.sign(data[:,:,0])
+            abs_diff = np.abs(data[:,:,0]-data[:,:,0])
+            slope = sign * abs_diff
+                
+            lower_bdry_z = np.moveaxis(np.array([data[:,:,0] + slope * (sten + 1) for sten in np.arange(stencil)])[::-1],0,2)
+            
+            # at upper y-end:
+            sign = np.sign(data[:, :, nz - 1])
+            abs_diff = np.abs(data[:, :, nz - 1] - data[:, :, nz - 2])
+            slope = sign * abs_diff
+            
+            upper_bdry_z = np.moveaxis(np.array([data[:, :, nz - 1] + slope * (sten + 1) for sten in np.arange(stencil)]),0,2)
+            
+            data = np.concatenate((lower_bdry_z, data, upper_bdry_z),axis=2)
+            
+            return data
 
 '''
 Function for adding extrapolated boundary conditions.

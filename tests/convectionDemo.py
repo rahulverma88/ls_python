@@ -43,23 +43,41 @@ useSubplots = 1
 
 # Create the grid.
 g_dim = 2
-g_min = [-1, -2]
-g_max = [1, 4]
+# minimum in each direction: x, y, and (if present) z
+# Note the convention: always x, y and z except for gridShape
+g_min = [-1, -2]#,-1]
+g_max = [1, 4]#,1]
 g_dx = 1/100
 
 grid = Grid(g_dim, g_min, g_max, g_dx)
-grid.getGhostBounds(2)
+
+
+# set accuracy
+accuracy = 'high'
+
+if accuracy == 'low':
+    stencil = 1
+elif accuracy == 'medium':
+    stencil = 2
+elif accuracy == 'high':
+    stencil = 3
+
+grid.getGhostBounds(stencil)
 #%%
 # Create flow field
 constV = np.zeros(2)
 constV[1] = 1
 
+# velocity is also defined with the same convention:
+# [vx, vy [, vz]]
+# However, note that inside each of vx, vy and vz, the shapes are corresponding 
+# actual matrix dimensions
 vel = fill_grid(grid, constV)
 flowType = 'constant'
 
 # Create initial conditions (a circle/sphere)
 
-center = [0, 0.1]
+center = [0, 0.1, 0] # (x,y,z)
 radius = 0.35
 gridvals = grid.getGridVals()
 data = np.zeros(grid.gridShape)
@@ -70,7 +88,7 @@ for i in range(0, grid.dim):
 data = np.sqrt(data) - radius
 
 #%%
-data = grid.ghostExtrapolate(data, 2)
+data = grid.ghostExtrapolate(data, stencil)
 
 data0 = data;
 
