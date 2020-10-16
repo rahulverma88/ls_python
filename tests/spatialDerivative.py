@@ -46,6 +46,19 @@ def upwindFirstFirst(data,dim,grid):
 
     
 def upwindFirstENO2(data,dim,grid):
+    '''
+    Second order accurate upwind derivatives using ENO2
+    
+    data: 2d or 3d Numpy array
+    dim: dimension on which gradients are to be calculated
+        I assume dim 0 is x -> so axis 1 in a numpy array
+                 dim 1 is y -> axis 0 in numpy array
+                 dim 3 is z (same)
+        
+    grid: grid object - here is used mainly for storing grid spacing, dx
+    
+    returns: upwind derivative phi_{dim}_plus, downwind derivative phi_{dim}_minus
+    '''
     if dim == 0:
         axis = 1
     elif dim == 1:
@@ -74,6 +87,19 @@ def upwindFirstENO2(data,dim,grid):
     return phi_dim_minus, phi_dim_plus
 
 def upwindFirstENO3(data,dim,grid):
+    '''
+    Third order accurate upwind derivatives
+    
+    data: 2d or 3d Numpy array
+    dim: dimension on which gradients are to be calculated
+        I assume dim 0 is x -> so axis 1 in a numpy array
+                 dim 1 is y -> axis 0 in numpy array
+                 dim 3 is z (same)
+        
+    grid: grid object - here is used mainly for storing grid spacing, dx
+    
+    returns: upwind derivative phi_{dim}_plus, downwind derivative phi_{dim}_minus
+    '''
     if dim == 0:
         axis = 1
     elif dim == 1:
@@ -122,6 +148,19 @@ def upwindFirstENO3(data,dim,grid):
     return phi_dim_minus, phi_dim_plus
 
 def uowindFirstWENO5(data, dim, grid):
+    '''
+    Fifth order accurate weighted ENO derivatives
+    
+    data: 2d or 3d Numpy array
+    dim: dimension on which gradients are to be calculated
+        I assume dim 0 is x -> so axis 1 in a numpy array
+                 dim 1 is y -> axis 0 in numpy array
+                 dim 3 is z (same)
+        
+    grid: grid object - here is used mainly for storing grid spacing, dx
+    
+    returns: upwind derivative phi_{dim}_plus, downwind derivative phi_{dim}_minus
+    '''
     if dim == 0:
         axis = 1
     elif dim == 1:
