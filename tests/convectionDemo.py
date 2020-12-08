@@ -83,14 +83,14 @@ gridvals = grid.getGridVals()
 data = np.zeros(grid.gridShape)
 
 for i in range(0, grid.dim):
-  data = data + np.power(gridvals[i] - center[i],2);
+  data = data + np.power(gridvals[i] - center[i],2)
 
 data = np.sqrt(data) - radius
 
 #%%
 data = grid.ghostExtrapolate(data, stencil)
 
-data0 = data;
+data0 = data
 
 schemeConvection = schemeData(grid, velocity=vel)
 
