@@ -1,4 +1,5 @@
 *.ipynb
+.idea/
 data/
 IanMitchellToolbox/
 __pycache__/

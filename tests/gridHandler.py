@@ -110,7 +110,7 @@ class Grid:
             return xv, yv, zv
     '''
     Function for adding extrapolated boundary conditions.
-    Currently 2D only. Must add functionality for 3D
+    3D functionality to be verified
     '''
     def ghostExtrapolate(self, data, stencil):
         if self.dim == 2:
@@ -186,7 +186,7 @@ class Grid:
             
             # at lower z-end:
             sign = np.sign(data[:,:,0])
-            abs_diff = np.abs(data[:,:,0]-data[:,:,0])
+            abs_diff = np.abs(data[:,:,0]-data[:,:,1])
             slope = sign * abs_diff
                 
             lower_bdry_z = np.moveaxis(np.array([data[:,:,0] + slope * (sten + 1) for sten in np.arange(stencil)])[::-1],0,2)
