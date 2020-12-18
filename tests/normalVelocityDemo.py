@@ -14,6 +14,9 @@ from terms import schemeData, velocityTerm, fill_grid
 from odeCFL import odeCFL1
 from options import Options
 
+# Speed of motion normal to the interface.
+aValue = 0.25
+
 # Integration parameters.
 tMax = 1.0  # End time.
 plotSteps = 9  # How many intermediate plots to produce?
@@ -60,20 +63,8 @@ elif accuracy == 'high':
     stencil = 3
 
 grid.getGhostBounds(stencil)
-# %%
-# Create flow field
-constV = np.zeros(2)
-constV[1] = 1
-
-# velocity is also defined with the same convention:
-# [vx, vy [, vz]]
-# However, note that inside each of vx, vy and vz, the shapes are corresponding
-# actual matrix dimensions
-vel = fill_grid(grid, constV)
-flowType = 'constant'
 
 # Create initial conditions (a circle/sphere)
-
 center = [0, 0.1, 0]  # (x,y,z)
 radius = 0.35
 gridvals = grid.getGridVals()
