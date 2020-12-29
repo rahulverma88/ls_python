@@ -10,8 +10,9 @@ level set with only normal velocity term
 """
 import numpy as np
 from gridHandler import Grid
-from terms import schemeData, velocityTerm, fill_grid
-from odeCFL import odeCFL1
+from terms import schemeData, normalTerm, fill_grid
+from odeCFL import odeCFL1, odeCFL2, odeCFL3
+from spatialDerivative import upwindFirstFirst, upwindFirstENO2, upwindFirstENO3, upwindFirstWENO5
 from options import Options
 
 # Speed of motion normal to the interface.
@@ -57,10 +58,20 @@ accuracy = 'high'
 
 if accuracy == 'low':
     stencil = 1
+    timeInt = odeCFL1
+    spatDeriv = upwindFirstFirst
 elif accuracy == 'medium':
     stencil = 2
+    timeInt = odeCFL2
+    spatDeriv = upwindFirstENO2
 elif accuracy == 'high':
     stencil = 3
+    timeInt = odeCFL3
+    spatDeriv = upwindFirstENO3
+elif accuracy == 'veryHigh':
+    stencil = 3
+    timeInt = odeCFL3
+    spatDeriv = upwindFirstWENO5
 
 grid.getGhostBounds(stencil)
 
@@ -80,7 +91,7 @@ data = grid.ghostExtrapolate(data, stencil)
 
 data0 = data
 
-schemeConvection = schemeData(grid, velocity=vel)
+schemeNormal = schemeData(grid, normal_vel=aValue)
 
 t = t0
 opts = Options()
@@ -88,7 +99,7 @@ opts = Options()
 # %%
 while t < tMax:
     tSpan = [t, min(tMax, t + tPlot)]
-    t, data_next = odeCFL1(data, tSpan, velocityTerm, grid, schemeConvection, opts)
+    t, data_next = timeInt(data, tSpan, normalTerm, grid, schemeNormal, spatDeriv, opts)
     print(t)
     data = data_next
 

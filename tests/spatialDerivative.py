@@ -147,7 +147,7 @@ def upwindFirstENO3(data,dim,grid):
         
     return phi_dim_minus, phi_dim_plus
 
-def uowindFirstWENO5(data, dim, grid):
+def upwindFirstWENO5(data, dim, grid):
     '''
     Fifth order accurate weighted ENO derivatives
     

@@ -7,7 +7,7 @@ Created on Wed May 27 18:21:13 2020
 """
 
 import numpy as np
-from spatialDerivative import upwindFirstFirst
+#from spatialDerivative import upwindFirstFirst
 
 class schemeData:
     def __init__(self, grid, **kwargs):
@@ -45,11 +45,12 @@ def fill_grid(grid, vel):
         
         return vel_field
         
-def velocityTerm(data, grid, schemeData):
+def velocityTerm(data, grid, schemeData, derivFunc):
+
     vel = schemeData.velocity
     delta = np.zeros(data.shape)
     for dim in range(grid.dim):
-        d_minus, d_plus = upwindFirstFirst(data, dim, grid)
+        d_minus, d_plus = derivFunc(data, dim, grid)
         v = vel[dim]
         deriv = d_minus * (v > 0) + d_plus * (v < 0)
         delta += deriv * v#/grid.dx
@@ -59,4 +60,37 @@ def velocityTerm(data, grid, schemeData):
     
     # -1 is for transferring term to RHS
     return -1 * delta, 1/step_inv
+
+def normalTerm(data, grid, schemeData, derivFunc):
+
+    norm_vel = schemeData.normal_vel
+    delta = np.zeros(data.shape)
+    stepBoundInv = np.zeros(data.shape)
+
+    for dim in range(grid.dim):
+        d_minus, d_plus = derivFunc(data, dim, grid)
+        prodL = norm_vel * d_minus
+        prodR = norm_vel * d_plus
+        magL = abs(prodL)
+        magR = abs(prodR)
+
+        flowL = ((prodL >= 0) & (prodR >= 0)) | \
+                ((prodL >= 0) & (prodR <= 0) & (magL >= magR))
+        flowR = ((prodL <= 0) & (prodR <= 0)) | \
+                ((prodL >= 0) & (prodR <= 0) & (magL < magR))
+
+        magnitude = magnitude + derivL. ^ 2. * flowL + derivR. ^ 2. * flowR
+
+        effectiveVelocity = magL * flowL + magR * flowR
+        dxInv = 1 / grid.dx
+        stepBoundInv = stepBoundInv + dxInv * effectiveVelocity
+
+    magnitude = np.sqrt(magnitude)
+    delta = norm_vel * magnitude
+
+    nonZero = magnitude > 0
+    stepBoundInvNonZero = stepBoundInv[nonZero] / magnitude[nonZero]
+    stepBound = 1 / max(stepBoundInvNonZero)
+
+    return -1 * delta, stepBound
 
