@@ -79,7 +79,7 @@ def normalTerm(data, grid, schemeData, derivFunc):
         flowR = ((prodL <= 0) & (prodR <= 0)) | \
                 ((prodL >= 0) & (prodR <= 0) & (magL < magR))
 
-        magnitude = magnitude + derivL. ^ 2. * flowL + derivR. ^ 2. * flowR
+        magnitude = magnitude + d_minus ^ 2 * flowL + d_plus ^ 2 * flowR
 
         effectiveVelocity = magL * flowL + magR * flowR
         dxInv = 1 / grid.dx
@@ -93,4 +93,8 @@ def normalTerm(data, grid, schemeData, derivFunc):
     stepBound = 1 / max(stepBoundInvNonZero)
 
     return -1 * delta, stepBound
+
+
+
+
 
