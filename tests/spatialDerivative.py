@@ -197,6 +197,44 @@ def upwindFirstWENO5(data, dim, grid):
     
     return phi_dim_minus, phi_dim_plus
 
+def curvatureSecond(data, grid):
+    '''
+    Parameters
+    ----------
+    data
+    grid
+
+    Returns
+    -------
+
+    Calculates: phi_x, phi_y, (and phi_z, if 3d). Then for Hessian, phi_xx, phi_yy
+    (and phi_zz for 3d), phi_xy, (and phi_xz, phi_yz for 3d). All center-difference
+    '''
+
+    phi_x = np.gradient(data, grid.dx, axis=1)
+    phi_y = np.gradient(data, grid.dx, axis=0)
+
+    phi_xy = np.gradient(phi_x, grid.dx, axis=0)
+
+    phi_xx = np.gradient(data, grid.dx, axis=1)
+    phi_yy = np.gradient(data, grid.dx, axis=0)
+
+    if grid.dim == 3:
+        phi_z = np.gradient(data, grid.dx, axis=2)
+        phi_zz = np.gradient(data, grid.dx, axis=2)
+        phi_xz = np.gradient(phi_x, grid.dx, axis=2)
+        phi_yz = np.gradient(phi_y, grid.dx, axis=2)
+
+    gradMag2 = phi_x ^2 + phi_y ^2
+
+    if grid.dim == 3:
+        gradMag2 += phi_z^2
+
+    gradMag = np.sqrt(gradMag2)
+
+    curv = (phi_x^2 * phi_yy - 2* phi_x * phi_y * phi_xy + phi_y^2 * phi_xx +
+            )
+
 def upwindFirstFirst_old(data, dim, grid):
     # dim 0 is x -> in data it is axis 1
     # dim 1 is y -> in data it is axis 0
