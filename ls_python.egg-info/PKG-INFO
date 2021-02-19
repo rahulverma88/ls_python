@@ -1,0 +1,15 @@
+Metadata-Version: 2.1
+Name: ls-python
+Version: 0.1
+Summary: Level set library written in Python
+Home-page: https://github.com/rahulverma88/ls_python
+Author: Rahul Verma
+Author-email: rahulverma88@gmail.com
+License: MIT
+Description: # ls_python
+        Python implementation of level set library
+        
+Platform: UNKNOWN
+Classifier: Programming Language :: Python :: 3
+Classifier: License :: OSI Approved :: MIT License
+Description-Content-Type: text/markdown
