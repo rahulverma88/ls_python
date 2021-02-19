@@ -12,11 +12,12 @@ level set with only convection velocity term
 import numpy as np
 from gridHandler import Grid
 from terms import schemeData, velocityTerm, fill_grid
-from odeCFL import odeCFL1
+from odeCFL import odeCFL1, odeCFL2, odeCFL3
+from spatialDerivative import upwindFirstFirst, upwindFirstENO2, upwindFirstENO3, upwindFirstWENO5
 from options import Options
 
 # Integration parameters.
-tMax = 1.0                 # End time.
+tMax = 0.1                 # End time.
 plotSteps = 9              # How many intermediate plots to produce?
 t0 = 0                     # Start time.
 singleStep = 0             # Plot at each timestep (overrides tPlot).
@@ -41,11 +42,11 @@ deleteLastPlot = 0
 useSubplots = 1
 
 # Create the grid.
-g_dim = 2
+g_dim = 3
 # minimum in each direction: x, y, and (if present) z
 # Note the convention: always x, y and z except for gridShape
-g_min = [-1, -2]#,-1]
-g_max = [1, 4]#,1]
+g_min = [-1, -2,-1]
+g_max = [1, 4,1]
 g_dx = 1/100
 
 grid = Grid(g_dim, g_min, g_max, g_dx)
@@ -56,15 +57,26 @@ accuracy = 'high'
 
 if accuracy == 'low':
     stencil = 1
+    timeInt = odeCFL1
+    spatDeriv = upwindFirstFirst
 elif accuracy == 'medium':
     stencil = 2
+    timeInt = odeCFL2
+    spatDeriv = upwindFirstENO2
 elif accuracy == 'high':
     stencil = 3
+    timeInt = odeCFL3
+    spatDeriv = upwindFirstENO3
+elif accuracy == 'veryHigh':
+    stencil = 3
+    timeInt = odeCFL3
+    spatDeriv = upwindFirstWENO5
+
 
 grid.getGhostBounds(stencil)
 #%%
 # Create flow field
-constV = np.zeros(2)
+constV = np.zeros(grid.dim)
 constV[1] = 1
 
 # velocity is also defined with the same convention:
@@ -99,7 +111,7 @@ opts = Options()
 #%%
 while t < tMax:
     tSpan = [ t, min(tMax, t + tPlot) ]
-    t, data_next = odeCFL1(data, tSpan, velocityTerm, grid, schemeConvection, opts)
+    t, data_next = timeInt(data, tSpan, velocityTerm, grid, schemeConvection, spatDeriv, opts)
     print(t)
     data = data_next
 
