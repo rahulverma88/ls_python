@@ -42,7 +42,7 @@ deleteLastPlot = 0
 useSubplots = 1
 
 # Create the grid.
-g_dim = 3
+g_dim = 2
 # minimum in each direction: x, y, and (if present) z
 # Note the convention: always x, y and z except for gridShape
 g_min = [-1, -2,-1]
