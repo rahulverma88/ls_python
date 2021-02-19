@@ -10,7 +10,7 @@ level set with only normal velocity term
 """
 import numpy as np
 from gridHandler import Grid
-from terms import schemeData, normalTerm, fill_grid
+from terms import schemeData, normalTerm, fill_grid, normalTerm_new, fill_grid_norm
 from odeCFL import odeCFL1, odeCFL2, odeCFL3
 from spatialDerivative import upwindFirstFirst, upwindFirstENO2, upwindFirstENO3, upwindFirstWENO5
 from options import Options
@@ -47,11 +47,9 @@ useSubplots = 1
 g_dim = 2
 # minimum in each direction: x, y, and (if present) z
 # Note the convention: always x, y and z except for gridShape
-g_min = [-1, -2]  # ,-1]
-g_max = [1, 4]  # ,1]
+g_min = [-1, -1]  # ,-1]
+g_max = [1, 1]  # ,1]
 g_dx = 1 / 100
-
-grid = Grid(g_dim, g_min, g_max, g_dx)
 
 # set accuracy
 accuracy = 'high'
@@ -73,7 +71,9 @@ elif accuracy == 'veryHigh':
     timeInt = odeCFL3
     spatDeriv = upwindFirstWENO5
 
-grid.getGhostBounds(stencil)
+grid = Grid(g_dim, g_min, g_max, g_dx, stencil)
+
+#grid.getGhostBounds(stencil)
 
 # Create initial conditions (a circle/sphere)
 center = [0, 0.1, 0]  # (x,y,z)
@@ -91,7 +91,9 @@ data = grid.ghostExtrapolate(data, stencil)
 
 data0 = data
 
-schemeNormal = schemeData(grid, normal_vel=aValue)
+norm_vel = fill_grid_norm(grid, [aValue])
+
+schemeNormal = schemeData(grid, normal_vel=norm_vel)
 
 t = t0
 opts = Options()
@@ -99,7 +101,7 @@ opts = Options()
 # %%
 while t < tMax:
     tSpan = [t, min(tMax, t + tPlot)]
-    t, data_next = timeInt(data, tSpan, normalTerm, grid, schemeNormal, spatDeriv, opts)
+    t, data_next = timeInt(data, tSpan, normalTerm_new, grid, schemeNormal, spatDeriv, opts)
     print(t)
     data = data_next
 

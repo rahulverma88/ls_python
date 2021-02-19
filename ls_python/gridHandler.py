@@ -17,7 +17,7 @@ class Grid:
     
     '''
     
-    def __init__(self, dim, gmin, gmax, dx, bdry = 'ghostExtrapolate'):
+    def __init__(self, dim, gmin, gmax, dx, stencil, bdry = 'ghostExtrapolate'):
         '''
         Constructor assuming grid spacing dx is passed
         Passing both grid spacing dx and grid bounds is inherently inconsistent,
@@ -62,6 +62,7 @@ class Grid:
                 actual_gmax.append(dim_gmax + dx - float(mod_val))
         self.gmax = np.array(actual_gmax)
         self.dx = np.array(dx)
+        self.stencil = stencil
         self.bdry = bdry
         
         self.gridShape = [int((self.gmax[1]-self.gmin[1])/self.dx),
@@ -70,7 +71,8 @@ class Grid:
         if dim == 3:
             self.gridShape.append(int((self.gmax[2]-self.gmin[2])/self.dx))
     
-    def getGhostBounds(self, stencil):
+        
+    #def getGhostBounds(self, stencil):
         self.gmin_ghost = self.gmin - self.dx * stencil
         self.gmax_ghost = self.gmax + self.dx * stencil
         self.ghostShape = [self.gridShape[0] + 2 * stencil,

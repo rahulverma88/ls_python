@@ -43,6 +43,9 @@ def fill_grid(grid, vel):
         vel_field = np.array([np.ones(grid.ghostShape) * vel_comp for vel_comp in vel])
         
         return vel_field
+    
+def fill_grid_norm(grid, norm_vel):
+    return np.ones(grid.ghostShape)*norm_vel
         
 def velocityTerm(data, grid, schemeData, derivFunc):
 
@@ -88,7 +91,7 @@ def normalTerm_new(data, grid, schemeData, derivFunc):
         
         norm_grad_sq += data_d_cur ** 2
         
-        sum_inv += data_d_cur * dxInv
+        sum_inv += norm_vel * data_d_cur * dxInv
     
     norm_grad_phi_sq = norm_vel_pos * pos_norm_contrib + \
         norm_vel_neg * neg_norm_contrib
@@ -99,7 +102,7 @@ def normalTerm_new(data, grid, schemeData, derivFunc):
 
     norm_grad = np.sqrt(norm_grad_sq)
     
-    H_over_dX = np.max((np.abs(norm_vel)/norm_grad ) * sum_inv)
+    H_over_dX = np.max((np.abs(sum_inv/norm_grad)))
     
     
     return -1 * delta, H_over_dX

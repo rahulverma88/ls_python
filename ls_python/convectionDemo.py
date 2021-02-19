@@ -49,9 +49,6 @@ g_min = [-1, -2,-1]
 g_max = [1, 4,1]
 g_dx = 1/100
 
-grid = Grid(g_dim, g_min, g_max, g_dx)
-
-
 # set accuracy
 accuracy = 'high'
 
@@ -72,8 +69,10 @@ elif accuracy == 'veryHigh':
     timeInt = odeCFL3
     spatDeriv = upwindFirstWENO5
 
+grid = Grid(g_dim, g_min, g_max, g_dx, stencil)
 
-grid.getGhostBounds(stencil)
+
+#grid.getGhostBounds(stencil)
 #%%
 # Create flow field
 constV = np.zeros(grid.dim)
