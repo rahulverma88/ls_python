@@ -63,11 +63,20 @@ def velocityTerm(data, grid, schemeData, derivFunc):
     # -1 is for transferring term to RHS
     return -1 * delta, 1/step_inv
 
+def curvatureTerm(data, grid, schemeData, derivFunc):
+    
+    b = schemeData.b
+    
+    curv = derivFunc(data, grid)
+    
+    step_inv = 3 * 2*b/(grid.dx)**2
+    
+    return b * curv, 1/step_inv
+
 def normalTerm_new(data, grid, schemeData, derivFunc):
 
     norm_vel = schemeData.normal_vel
     delta = np.zeros(data.shape)
-    stepBoundInv = np.zeros(data.shape)
     pos_norm_contrib = np.zeros(data.shape)
     neg_norm_contrib = np.zeros(data.shape)
     
