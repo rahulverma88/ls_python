@@ -20,7 +20,7 @@ import numpy as np
 from gridHandler import Grid
 from terms import schemeData, fill_grid_norm, curvature_term
 from odeCFL import odeCFL1, odeCFL2, odeCFL3
-from spatialDerivative import curvatureSecond, upwindFirstFirst, upwindFirstENO2, upwindFirstENO3, upwindFirstWENO5
+from spatialDerivative import curvatureSecond#, upwindFirstFirst, upwindFirstENO2, upwindFirstENO3, upwindFirstWENO5
 from options import Options
 
 # Speed of motion normal to the interface.
