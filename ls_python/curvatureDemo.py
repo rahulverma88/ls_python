@@ -18,7 +18,7 @@ level set with only normal velocity term
 """
 import numpy as np
 from gridHandler import Grid
-from terms import schemeData, fill_grid_norm, curvature_term
+from terms import schemeData, fill_grid_norm, curvatureTerm
 from odeCFL import odeCFL1, odeCFL2, odeCFL3
 from spatialDerivative import curvatureSecond#, upwindFirstFirst, upwindFirstENO2, upwindFirstENO3, upwindFirstWENO5
 from options import Options
@@ -101,7 +101,7 @@ data0 = data
 
 b_vel = fill_grid_norm(grid, [bValue])
 
-schemeCurvature = schemeData(grid, normal_vel=b_vel)
+schemeCurvature = schemeData(grid, curv_coef=b_vel)
 
 t = t0
 opts = Options()
@@ -109,7 +109,7 @@ opts = Options()
 # %%
 while t < tMax:
     tSpan = [t, min(tMax, t + tPlot)]
-    t, data_next = timeInt(data, tSpan, curvature_term, grid, schemeCurvature, spatDeriv, opts)
+    t, data_next = timeInt(data, tSpan, curvatureTerm, grid, schemeCurvature, spatDeriv, opts)
     print(t)
     data = data_next
 

@@ -225,21 +225,21 @@ def curvatureSecond(data, grid):
         phi_xz = np.gradient(phi_x, grid.dx, axis=2)
         phi_yz = np.gradient(phi_y, grid.dx, axis=2)
 
-    gradMag2 = phi_x ^ 2 + phi_y ^ 2
+    gradMag2 = phi_x ** 2 + phi_y ** 2
 
     if grid.dim == 3:
-        gradMag2 += phi_z ^ 2
+        gradMag2 += phi_z ** 2
 
     gradMag = np.sqrt(gradMag2)
 
-    curv_num = phi_x ^ 2 * phi_yy - 2 * phi_x * phi_y * phi_xy + phi_y ^ 2 * phi_xx
+    curv_num = (phi_x ** 2) * phi_yy - 2 * phi_x * phi_y * phi_xy + (phi_y ** 2) * phi_xx
 
     if grid.dim == 3:
-        curv_num += phi_x ^ 2 * phi_zz - 2 * phi_x * phi_y * phi_xz + phi_z ^ 2 * phi_xx + \
-                    phi_y ^ 2 * phi_zz - 2 * phi_y * phi_z * phi_yz + \
-                    phi_z ^ 2 * phi_yy
+        curv_num += (phi_x ** 2) * phi_zz - 2 * phi_x * phi_y * phi_xz + (phi_z ** 2) * phi_xx + \
+                    (phi_y ** 2) * phi_zz - 2 * phi_y * phi_z * phi_yz + \
+                    (phi_z ** 2) * phi_yy
 
-    curv = curv_num/gradMag ^ 3
+    curv = curv_num/(gradMag ** 3)
 
     return curv
 
