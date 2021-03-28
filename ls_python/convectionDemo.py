@@ -10,6 +10,8 @@ level set with only convection velocity term
 
 """
 import numpy as np
+import matplotlib.pyplot as plt
+
 from gridHandler import Grid
 from terms import schemeData, velocityTerm, fill_grid
 from odeCFL import odeCFL1, odeCFL2, odeCFL3
@@ -17,7 +19,7 @@ from spatialDerivative import upwindFirstFirst, upwindFirstENO2, upwindFirstENO3
 from options import Options
 
 # Integration parameters.
-tMax = 0.1                 # End time.
+tMax = 1.0                 # End time.
 plotSteps = 9              # How many intermediate plots to produce?
 t0 = 0                     # Start time.
 singleStep = 0             # Plot at each timestep (overrides tPlot).
@@ -106,13 +108,25 @@ schemeConvection = schemeData(grid, velocity=vel)
 
 t = t0
 opts = Options()
-
+gridvals_ghost = grid.getGridValsGhost()
 #%%
+# create plotting framework
+cols = round(np.sqrt(plotSteps))
+rows = cols
+while rows * cols < plotSteps:
+    rows += 1
+
+f, ax_arr = plt.subplots(rows, cols)
+ax_arr = ax_arr.reshape(-1)
+#%%
+i = 0
 while t < tMax:
     tSpan = [ t, min(tMax, t + tPlot) ]
     t, data_next = timeInt(data, tSpan, velocityTerm, grid, schemeConvection, spatDeriv, opts)
-    print(t)
     data = data_next
+    ax_arr[i].contour(gridvals_ghost[0], gridvals_ghost[1], data, [0])
+    i+=1
+plt.tight_layout()
 
 
     

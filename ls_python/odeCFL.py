@@ -70,7 +70,7 @@ def odeCFL3(data, tSpan, rhsFunc, grid, rhsData, spatDerivFunc, options):
     while t < tSpan[1]:
         rhs, stepBound = rhsFunc(data, grid, rhsData, spatDerivFunc)
         deltaT = min(options.factorCFL * stepBound, tSpan[1] - t, options.maxStep)
-        print('time inside odeCFL3: ', t)
+        #print('time inside odeCFL3: ', t)
         data_n_plus_1 = data + deltaT * rhs
         
         data_n_plus_1 = clipData(data_n_plus_1, grid)
