@@ -69,7 +69,7 @@ def curvatureTerm(data, grid, schemeData, derivFunc):
     
     curv = derivFunc(data, grid)
     
-    step_inv = 3 * 2*b/(grid.dx)**2
+    step_inv = 3 * 2*b/((grid.dx)**2)
     
     return b * curv, np.min(1/step_inv)
 

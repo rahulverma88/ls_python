@@ -17,17 +17,22 @@ Inspired from Ian Mitchell's examples
 level set with only normal velocity term
 """
 import numpy as np
+import importlib
+
 from gridHandler import Grid
 from terms import schemeData, fill_grid_norm, curvatureTerm
+import odeCFL
+importlib.reload(odeCFL)
+
 from odeCFL import odeCFL1, odeCFL2, odeCFL3
 from spatialDerivative import curvatureSecond#, upwindFirstFirst, upwindFirstENO2, upwindFirstENO3, upwindFirstWENO5
 from options import Options
 
-# Speed of motion normal to the interface.
-bValue = 0.25
+# Curvature coefficient
+bValue = 0.5
 
 # Integration parameters.
-tMax = 1.0  # End time.
+tMax = 0.1  # End time.
 plotSteps = 9  # How many intermediate plots to produce?
 t0 = 0  # Start time.
 singleStep = 0  # Plot at each timestep (overrides tPlot).
@@ -105,7 +110,7 @@ schemeCurvature = schemeData(grid, curv_coef=b_vel)
 
 t = t0
 opts = Options()
-
+#opts.factorCFL=0.9
 # %%
 while t < tMax:
     tSpan = [t, min(tMax, t + tPlot)]

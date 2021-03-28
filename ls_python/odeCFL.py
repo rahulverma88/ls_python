@@ -5,6 +5,7 @@ Created on Sat May 30 18:21:59 2020
 
 @author: rahul
 """
+import numpy as np
 
 def clipData(data, grid):
     stencil = grid.stencil
@@ -93,6 +94,12 @@ def odeCFL3(data, tSpan, rhsFunc, grid, rhsData, spatDerivFunc, options):
         
         data = clipData(data, grid)
         data = grid.ghostExtrapolate(data, grid.stencil)
+        
+        #if (data > 1e3).any():
+           # print('boom')
+        
+        #if np.isnan(data).any():
+           # pass
         
         t = t + deltaT
 
